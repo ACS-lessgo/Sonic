@@ -1,41 +1,75 @@
+<!-- App.vue -->
 <template>
-  <div class="app">
-    <h1>Sonic Metadata</h1>
-    <button @click="openAndReadFiles">Select Music Files</button>
+  <div id="app">
+    <header>
+      <input v-model="folderPath" placeholder="Paste path or click select" />
+      <button @click="chooseFolder">Select Folder</button>
+      <button v-if="folderPath" @click="rescan">Rescan</button>
+    </header>
 
-    <div v-for="(file, i) in metadata" :key="i" class="song">
-      <p>
-        <b>{{ file.title }}</b> — {{ file.artist }} ({{ file.album }})
-      </p>
-      <p>
-        <small>{{ file.duration }}s</small>
-      </p>
+    <main>
+      <MusicGrid :tracks="tracks" @play="playTrack" />
+    </main>
 
-      <!-- ✅ Display album art if it exists -->
-      <img
-        v-if="file.albumArt"
-        :src="file.albumArt"
-        alt="Album Art"
-        style="
-          width: 100px;
-          height: 100px;
-          object-fit: cover;
-          border-radius: 8px;
-        "
-      />
-      <hr />
-    </div>
+    <Player
+      v-if="current"
+      :track="current"
+      :queue="tracks"
+      @next="playNext"
+      @prev="playPrev"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref } from "vue"
+import { ref, onMounted } from "vue"
+import MusicGrid from "./components/MusicGrid.vue"
+import Player from "./components/Player.vue"
 
-const metadata = ref([])
+const folderPath = ref("")
+const tracks = ref([])
+const current = ref(null)
 
-const openAndReadFiles = async () => {
-  const result = await window.electronAPI.selectMusicFiles()
-  console.log("Result", result)
-  metadata.value = result
+async function chooseFolder() {
+  const res = await window.electronAPI.selectMusicFolder()
+  if (!res) return
+  folderPath.value = res.folder
+  tracks.value = res.lib
 }
+
+async function rescan() {
+  if (!folderPath.value) return
+  tracks.value = await window.electronAPI.scanFolder(folderPath.value)
+}
+
+function playTrack(track) {
+  current.value = track
+}
+
+function playNext() {
+  if (!current.value) return
+  const idx = tracks.value.findIndex((t) => t.id === current.value.id)
+  const next = tracks.value[(idx + 1) % tracks.value.length]
+  current.value = next
+}
+
+function playPrev() {
+  if (!current.value) return
+  const idx = tracks.value.findIndex((t) => t.id === current.value.id)
+  const prev =
+    tracks.value[(idx - 1 + tracks.value.length) % tracks.value.length]
+  current.value = prev
+}
+
+onMounted(async () => {
+  const lib = await window.electronAPI.getLibrary()
+  tracks.value = lib || []
+  window.electronAPI.onLibraryUpdated((data) => {
+    if (data.type === "add") tracks.value.push(data.track)
+    if (data.type === "remove")
+      tracks.value = tracks.value.filter((t) => t.id !== data.id)
+  })
+})
 </script>
+
+<style></style>
