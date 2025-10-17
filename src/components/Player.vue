@@ -1,4 +1,3 @@
-<!-- components/Player.vue -->
 <template>
   <div class="player">
     <img :src="track.albumArt || placeholder" alt="cover" class="cover" />
@@ -18,6 +17,25 @@
           :max="duration"
         />
         <div>{{ format(pos) }} / {{ format(duration) }}</div>
+
+        <div class="volume-control">
+          <label
+            for="volume"
+            @click="volume = volume > 0 ? 0 : 0.6"
+            style="cursor: pointer"
+          >
+            {{ volume > 0 ? "🎧" : "🔇" }}
+          </label>
+          <input
+            id="volume"
+            type="range"
+            v-model="volume"
+            min="0"
+            max="1"
+            step="0.01"
+          />
+          <span>{{ Math.round(volume * 100) }}%</span>
+        </div>
       </div>
     </div>
     <audio
@@ -30,7 +48,7 @@
 </template>
 
 <script setup>
-import { ref, watch, computed } from "vue"
+import { ref, watch, computed, onMounted } from "vue"
 const props = defineProps({ track: Object, queue: Array })
 const emit = defineEmits(["next", "prev"])
 
@@ -47,6 +65,19 @@ const placeholder =
 const fileUrl = computed(() =>
   props.track ? `file://${props.track.path}` : ""
 )
+const volume = ref(0.6) // default vol is 60
+
+onMounted(() => {
+  if (audio.value) {
+    audio.value.volume = volume.value
+  }
+})
+
+watch(volume, (v) => {
+  if (audio.value) {
+    audio.value.volume = v
+  }
+})
 
 watch(
   () => props.track,
@@ -141,5 +172,45 @@ function format(s) {
 }
 input[type="range"] {
   flex: 1;
+}
+
+.volume-control {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 150px;
+}
+
+.volume-control label {
+  cursor: pointer;
+  font-size: 18px;
+  user-select: none;
+}
+
+.volume-control input[type="range"] {
+  width: 80px;
+  cursor: pointer;
+}
+
+.volume-control span {
+  font-size: 12px;
+  color: #ccc;
+  min-width: 32px;
+  text-align: right;
+}
+
+.volume-control button {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 18px;
+  cursor: pointer;
+  transition:
+    transform 0.2s,
+    color 0.2s;
+}
+
+.volume-control button:hover {
+  transform: scale(1.2);
 }
 </style>
