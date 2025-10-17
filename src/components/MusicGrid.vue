@@ -32,22 +32,7 @@
           <div class="title">{{ t.title }}</div>
           <div class="artist">{{ t.artist }}</div>
         </div>
-      </div>
-    </div>
-
-    <!-- MASONRY VIEW -->
-    <div v-else-if="viewMode === 'masonry'" class="masonry">
-      <div
-        v-for="t in tracks"
-        :key="t.id"
-        class="masonry-card"
-        @click="$emit('play', t)"
-      >
-        <img :src="t.albumArt || placeholder" />
-        <div class="overlay">
-          <div class="title">{{ t.title }}</div>
-          <div class="artist">{{ t.artist }}</div>
-        </div>
+        <button class="more-btn" @click.stop="openMenu(t)">⋮</button>
       </div>
     </div>
   </div>
@@ -64,6 +49,11 @@ const placeholder =
   btoa(
     `<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><rect fill='#333' width='100%' height='100%'/><text x='50%' y='50%' fill='#fff' font-size='20' text-anchor='middle' alignment-baseline='middle'>No Art</text></svg>`
   )
+
+function openMenu(track) {
+  console.log("Options for:", track.title)
+  // TODO: open a custom menu
+}
 </script>
 
 <style scoped>
@@ -107,7 +97,7 @@ const placeholder =
   left: 50%;
   transform: translate(-50%, -50%);
   font-size: 30px;
-  color: #1db954;
+  color: rgb(226, 219, 219);
   opacity: 0;
   transition:
     opacity 0.2s,
@@ -135,83 +125,61 @@ const placeholder =
 }
 
 /* --- LIST VIEW --- */
-.list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
 .list-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  background: #2a2a2a;
-  padding: 8px 12px;
-  border-radius: 10px;
-  transition: all 0.2s;
-}
-.list-item:hover {
-  background: #333;
-  transform: translateX(4px);
-}
-.list-cover {
-  width: 60px;
-  height: 60px;
-  object-fit: cover;
-  border-radius: 6px;
-}
-.list-meta .title {
-  font-weight: 600;
-}
-.list-meta .artist {
-  font-size: 12px;
-  color: #bbb;
+  justify-content: space-between;
+  background: #1e1e1e;
+  color: #fff;
+  padding: 10px;
+  transition: background 0.2s ease;
+  border-bottom: #bdb5b5d5 1px solid;
 }
 
-/* --- MASONRY VIEW --- */
-.masonry {
-  column-count: 3;
-  column-gap: 12px;
+.list-item:hover {
+  background: #2a2a2a;
 }
-.masonry-card {
-  break-inside: avoid;
-  margin-bottom: 12px;
-  position: relative;
-  cursor: pointer;
-  border-radius: 12px;
+
+.list-cover {
+  width: 50px;
+  height: 50px;
+  border-radius: 4px;
+  object-fit: cover;
+  margin-right: 10px;
+}
+
+.list-meta {
+  flex: 1;
   overflow: hidden;
-  transition:
-    transform 0.2s,
-    box-shadow 0.2s;
 }
-.masonry-card img {
-  width: 100%;
-  display: block;
-  border-radius: 12px;
-}
-.masonry-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
-}
-.masonry-card .overlay {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: linear-gradient(
-    to top,
-    rgba(33, 33, 33, 0.9),
-    rgba(33, 33, 33, 0)
-  );
-  color: #fff;
-  padding: 8px;
-  font-size: 13px;
-}
-.masonry-card .overlay .title {
+
+.title {
   font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
-.masonry-card .overlay .artist {
-  font-size: 12px;
-  color: #ccc;
+
+.artist {
+  font-size: 13px;
+  color: #aaa;
+}
+
+.more-btn {
+  background: transparent;
+  border: none;
+  color: #bbb;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background 0.2s;
+  right: 0;
+}
+
+.more-btn:hover {
+  background: #333;
+  color: #fff;
 }
 
 /* Responsive adjustments */

@@ -22,12 +22,6 @@
       >
         List
       </button>
-      <button
-        @click="viewMode = 'masonry'"
-        :class="{ active: viewMode === 'masonry' }"
-      >
-        Masonry
-      </button>
     </div>
 
     <!-- Music library -->
@@ -113,7 +107,7 @@ onMounted(async () => {
 })
 </script>
 
-<style scoped>
+<style>
 /* App background */
 #app {
   background-color: #212121;
@@ -199,5 +193,25 @@ main {
   height: 200px;
   font-size: 16px;
   color: #aaa;
+}
+
+/* Dark Scrollbar */
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #444;
+  border: 2px solid #1a1a1a;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #666;
 }
 </style>
